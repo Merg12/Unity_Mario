@@ -20,6 +20,7 @@ public class Player_Move_Prototype : MonoBehaviour
     void Update()
     {
         PlayerMove();
+        PlayerRaycast();
     }
 
     void PlayerMove()
@@ -61,8 +62,36 @@ public class Player_Move_Prototype : MonoBehaviour
 
     void OnCollisionEnter2D(Collision2D col)
     {
-        Debug.Log("Player has collided with " + col.collider.name);
+        /*Debug.Log("Player has collided with " + col.collider.name);
         if(col.gameObject.tag == "ground")
+        {
+            isGrounded = true;
+        }*/ //this is no longer needed because in void PlayerRaycast(), there's a if statement for isGrounded = true
+    }
+
+    void PlayerRaycast()
+    {
+        RaycastHit2D rayUp = Physics2D.Raycast(transform.position, Vector2.up);
+        if(rayUp != null && rayUp.collider != null && rayUp.distance < 0.9f && rayUp.collider.name == "breakbox") //problem with this collider.name is that ONLY the box with this EXACT name can be destroyed this way, if you duplicate this, it will not work because the 2nd box won't have the same name, you'll have to change it to the same name manually
+        {
+            Destroy(rayUp.collider.gameObject);
+            //Debug.Log("Hit box!");
+        }
+
+        RaycastHit2D rayDown = Physics2D.Raycast(transform.position, Vector2.down);
+        if(rayDown != null && rayDown.collider != null && rayDown.distance < 2.0f && rayDown.collider.tag == "enemy")
+        {
+            //Debug.Log("Squished enemy!");
+            GetComponent<Rigidbody2D>().AddForce(Vector2.up * 1000);
+            //Destroy(hit.collider.gameObject); //destroys the enemy
+            rayDown.collider.gameObject.GetComponent<Rigidbody2D>().AddForce(Vector2.right * 200); //after jumps on enemy, enemy bounces to the right
+            rayDown.collider.gameObject.GetComponent<Rigidbody2D>().gravityScale = 8;
+            rayDown.collider.gameObject.GetComponent<Rigidbody2D>().freezeRotation = false;
+            rayDown.collider.gameObject.GetComponent<BoxCollider2D>().enabled = false; //boxcollider is disabled to enemy falls thru the floor
+            rayDown.collider.gameObject.GetComponent<enemyMove>().enabled = false; //this will then disable the script tied to the enemy, keep in mind, this causes problems with trying to distroy the enemy when it bounces off the screen in the enemyMove script, instead we should create a new enemyHealth script
+        }
+
+        if(rayUp != null && rayDown.collider != null && rayDown.distance < 0.9f && rayDown.collider.tag != "enemy")
         {
             isGrounded = true;
         }

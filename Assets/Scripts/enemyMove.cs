@@ -20,7 +20,18 @@ public class enemyMove : MonoBehaviour
         if(hit.distance < 0.7f)
         {
             Flip();
+            //Destroy(hit.collider.gameObject); //destroys everything it touches on its sides
+            if(hit.collider.tag == "Player")
+            {
+                Destroy(hit.collider.gameObject);
+            }
         }
+        //TODO FIX THIS DISGUSTING CODE
+        /*if(gameObject.transform.position.y < -20)
+        {
+            Debug.Log("enemy Died!");
+            Destroy(gameObject);
+        }*/ //turns out this won't work because we have code in Player_Move script to disable THIS entire script once you squash the enemy
     }
 
     void Flip()
