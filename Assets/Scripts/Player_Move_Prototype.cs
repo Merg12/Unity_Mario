@@ -9,6 +9,7 @@ public class Player_Move_Prototype : MonoBehaviour
     public int playerJumpPower = 1250; //how high player jumps
     private float moveX;
     public bool isGrounded;
+    public float distanceToBottomOfPlayer = 0.9f;
 
     // Start is called before the first frame update
     void Start() //no need at this stage
@@ -72,14 +73,14 @@ public class Player_Move_Prototype : MonoBehaviour
     void PlayerRaycast()
     {
         RaycastHit2D rayUp = Physics2D.Raycast(transform.position, Vector2.up);
-        if(rayUp != null && rayUp.collider != null && rayUp.distance < 0.9f && rayUp.collider.name == "breakbox") //problem with this collider.name is that ONLY the box with this EXACT name can be destroyed this way, if you duplicate this, it will not work because the 2nd box won't have the same name, you'll have to change it to the same name manually
+        if(rayUp != null && rayUp.collider != null && rayUp.distance < distanceToBottomOfPlayer && rayUp.collider.name == "breakbox") //problem with this collider.name is that ONLY the box with this EXACT name can be destroyed this way, if you duplicate this, it will not work because the 2nd box won't have the same name, you'll have to change it to the same name manually
         {
             Destroy(rayUp.collider.gameObject);
             //Debug.Log("Hit box!");
         }
 
         RaycastHit2D rayDown = Physics2D.Raycast(transform.position, Vector2.down);
-        if(rayDown != null && rayDown.collider != null && rayDown.distance < 2.0f && rayDown.collider.tag == "enemy")
+        if(rayDown != null && rayDown.collider != null && rayDown.distance < distanceToBottomOfPlayer && rayDown.collider.tag == "enemy")
         {
             //Debug.Log("Squished enemy!");
             GetComponent<Rigidbody2D>().AddForce(Vector2.up * 1000);
@@ -91,7 +92,7 @@ public class Player_Move_Prototype : MonoBehaviour
             rayDown.collider.gameObject.GetComponent<enemyMove>().enabled = false; //this will then disable the script tied to the enemy, keep in mind, this causes problems with trying to distroy the enemy when it bounces off the screen in the enemyMove script, instead we should create a new enemyHealth script
         }
 
-        if(rayUp != null && rayDown.collider != null && rayDown.distance < 0.9f && rayDown.collider.tag != "enemy")
+        if(rayUp != null && rayDown.collider != null && rayDown.distance < distanceToBottomOfPlayer && rayDown.collider.tag != "enemy")
         {
             isGrounded = true;
         }
