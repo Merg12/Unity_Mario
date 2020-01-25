@@ -5,11 +5,13 @@ using UnityEngine;
 public class Player_Move_Prototype : MonoBehaviour
 {
     public int playerSpeed = 10;
-    private bool facingRight = true; //true if player is facing right, false otherwise
+    //private bool facingRight = true; //true if player is facing right, false otherwise, old method
     public int playerJumpPower = 1250; //how high player jumps
     private float moveX;
     public bool isGrounded;
     public float distanceToBottomOfPlayer = 0.9f;
+
+    public float distanceToSideOfPlayer = 0.9f;
 
     // Start is called before the first frame update
     void Start() //no need at this stage
@@ -32,15 +34,27 @@ public class Player_Move_Prototype : MonoBehaviour
         {
             Jump();
         }
+        
         //animations
-        //player directions
-        if(moveX > 0.0f && facingRight == false)
+        if(moveX != 0)
         {
-            FlipPlayer();
+            GetComponent<Animator>().SetBool("isRunning", true);
         }
-        else if(moveX < 0.0f && facingRight == true)
+        else if(moveX == 0)
         {
-            FlipPlayer();
+            GetComponent<Animator>().SetBool("isRunning", false);
+        }
+
+        //player directions
+        if(moveX > 0.0f) //used to include &&  && facingRight == false
+        {
+            GetComponent<SpriteRenderer>().flipX = false;
+            //FlipPlayer();
+        }
+        else if(moveX < 0.0f) //used to include && facingRight == true
+        {
+            GetComponent<SpriteRenderer>().flipX = true;
+            //FlipPlayer();
         }
         //physics
         gameObject.GetComponent<Rigidbody2D>().velocity = new Vector2(moveX * playerSpeed, gameObject.GetComponent<Rigidbody2D>().velocity.y);
@@ -53,15 +67,15 @@ public class Player_Move_Prototype : MonoBehaviour
         isGrounded = false;
     }
 
-    void FlipPlayer()
+    /*void FlipPlayer() //pretty old school method of flipping player
     {
         facingRight = !facingRight; //removing this will make face turn back to right after turning left
         Vector2 turnHead = gameObject.transform.localScale;
         turnHead.x *= -1; //this part makes the x-axis inverse
         transform.localScale = turnHead;
-    }
+    }*/
 
-    void OnCollisionEnter2D(Collision2D col)
+    void OnCollisionEnter2D(Collision2D col) //don't need this because we are using raycasting
     {
         /*Debug.Log("Player has collided with " + col.collider.name);
         if(col.gameObject.tag == "ground")
@@ -90,6 +104,18 @@ public class Player_Move_Prototype : MonoBehaviour
             rayDown.collider.gameObject.GetComponent<Rigidbody2D>().freezeRotation = false;
             rayDown.collider.gameObject.GetComponent<BoxCollider2D>().enabled = false; //boxcollider is disabled to enemy falls thru the floor
             rayDown.collider.gameObject.GetComponent<enemyMove>().enabled = false; //this will then disable the script tied to the enemy, keep in mind, this causes problems with trying to distroy the enemy when it bounces off the screen in the enemyMove script, instead we should create a new enemyHealth script
+        }
+
+        RaycastHit2D rayLeft = Physics2D.Raycast(transform.position, Vector2.left);
+        if(rayLeft.distance < distanceToSideOfPlayer)
+        {
+            isGrounded = true;
+        }
+
+        RaycastHit2D rayRight = Physics2D.Raycast(transform.position, Vector2.right);
+        if(rayRight.distance < distanceToSideOfPlayer)
+        {
+            isGrounded = true;
         }
 
         if(rayUp != null && rayDown.collider != null && rayDown.distance < distanceToBottomOfPlayer && rayDown.collider.tag != "enemy")
